@@ -1,0 +1,49 @@
+org: gonzaloan
+app: aws-ses-mail
+service: aws-ses-email-sender
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - "ses:SendEmail"
+            - "ses:SendRawEmail"
+          Resource: "*"
+functions:
+  create:
+    handler: index.createContact
+    events:
+      - http:
+          path: /contact-us
+          method: post
+          cors: true
+
+resources:
+  Resources:
+    ApiGatewayAccountRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        RoleName: serverlessApiGatewayCloudWatchRole
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service: "apigateway.amazonaws.com"
+              Action: "sts:AssumeRole"
+        Policies:
+          - PolicyName: ApiGatewayCloudWatchLogsPolicy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "logs:CreateLogGroup"
+                    - "logs:CreateLogStream"
+                    - "logs:PutLogEvents"
+                  Resource: "*"
